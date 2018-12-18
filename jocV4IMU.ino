@@ -13,14 +13,14 @@ long gyroX, gyroY, gyroZ;
 float rotX, rotY, rotZ;
 int buttonPressed = 0;
 int IMUMoved = 0;
-int liniePunct;
-int coloanaPunct;
-int linieCorp;
-int coloanaCorp;
-int prevLiniePunct;
-int prevColoanaPunct;
-int prevLinieCorp;
-int prevColoanaCorp;
+int pointLine;
+int pointColumn;
+int objectLine;
+int objectColumn;
+int prevPointLine;
+int prevPointColumn;
+int prevObjectLine;
+int prevObjectColumn;
 int score;
 int mode = 1;
 
@@ -80,8 +80,8 @@ byte three[8] = {
 };
 
 struct highScore {
-  int incepator;
-  int avansat;
+  int begginer;
+  int advanced;
   int freestyle;
 };
 
@@ -160,6 +160,7 @@ void meniu() {
   lcd.clear();
   while (buttonValue <= 200 || buttonValue >= 900) {
     buttonValue = analogRead(A1);
+    Serial.println(buttonValue);
     if (buttonValue > 900 && buttonPressed == 0) {
       buttonPressed = 1;
       switch (mode) {
@@ -198,10 +199,10 @@ void meniu() {
     mode--;
   switch (mode) {
     case 1:
-      nivelIncepator();
+      nivelBegginer();
       break;
     case 2:
-      nivelAvansat();
+      advancedLevel();
       break;
     case 3:
       nivelFreestyle();
@@ -224,13 +225,13 @@ void timeUP() {
   lcd.setCursor(13, 1);
   lcd.print(score);
   buzzer();
-  delay(3000);  //vreau sa-mi ramana scrisul pe lcd
+  delay(3000);
   highScore auxScore;
   EEPROM.get(0, auxScore);
   switch (mode) {
     case 1:
-      if (score > auxScore.incepator) {
-        auxScore.incepator = score;
+      if (score > auxScore.begginer) {
+        auxScore.begginer = score;
         lcd.clear();
         lcd.setCursor(3, 0);
         lcd.print("Congrats!");
@@ -239,8 +240,8 @@ void timeUP() {
       }
       break;
     case 2:
-      if (score > auxScore.avansat) {
-        auxScore.avansat = score;
+      if (score > auxScore.advanced) {
+        auxScore.advanced = score;
         lcd.clear();
         lcd.setCursor(3, 0);
         lcd.print("Congrats!");
@@ -283,56 +284,56 @@ void printMatrix() {
 
 void nivelFreestyle() {
   randomSeed(analogRead(A0));
-  liniePunct = random(7);
-  coloanaPunct = random(7);
-  linieCorp = random(7);
-  coloanaCorp = random(7);
+  pointLine = random(7);
+  pointColumn = random(7);
+  objectLine = random(7);
+  objectColumn = random(7);
   int timeNow = millis();
-  long timpMaxim = 45000;
+  long maxTime = 45000;
   int i, j;
-  while (timpMaxim > 0) {
+  while (maxTime > 0) {
     recordGyroRegisters();
     if (millis() - timeNow >= 1000) {
-      timpMaxim -= 1000;
+      maxTime -= 1000;
       timeNow += 1000;
-      if (timpMaxim == 0)
+      if (maxTime == 0)
         timeUP();
     }
-    matrixDisplay[liniePunct][coloanaPunct] = 1;
-    for (i = linieCorp; i <= linieCorp + 1; i++) {
-      for (j = coloanaCorp; j <= coloanaCorp + 1; j++) {
+    matrixDisplay[pointLine][pointColumn] = 1;
+    for (i = objectLine; i <= objectLine + 1; i++) {
+      for (j = objectColumn; j <= objectColumn + 1; j++) {
         matrixDisplay[i][j] = 1;
       }
     }
     printMatrix();
-    prevLiniePunct = liniePunct;
-    prevColoanaPunct = coloanaPunct;
+    prevPointLine = pointLine;
+    prevPointColumn = pointColumn;
     if (rotX > 50) {
-      coloanaPunct++;
-      if (coloanaPunct >= 8)
-        coloanaPunct = 0;
+      pointColumn++;
+      if (pointColumn >= 8)
+        pointColumn = 0;
     }
     if (rotX < -50) {
-      coloanaPunct--;
-      if (coloanaPunct < 0)
-        coloanaPunct = 7;
+      pointColumn--;
+      if (pointColumn < 0)
+        pointColumn = 7;
     }
     if (rotY < -50) {
-      liniePunct++;
-      if (liniePunct >= 8)
-        liniePunct = 0;
+      pointLine++;
+      if (pointLine >= 8)
+        pointLine = 0;
     }
     if (rotY > 50) {
-      liniePunct--;
-      if (liniePunct < 0)
-        liniePunct = 7;
+      pointLine--;
+      if (pointLine < 0)
+        pointLine = 7;
     }
-    if (liniePunct == linieCorp && coloanaPunct == coloanaCorp || liniePunct == linieCorp && coloanaPunct == coloanaCorp + 1 || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp + 1) {
+    if (pointLine == objectLine && pointColumn == objectColumn || pointLine == objectLine && pointColumn == objectColumn + 1 || pointLine == objectLine + 1 && pointColumn == objectColumn || pointLine == objectLine + 1 && pointColumn == objectColumn + 1) {
       score++;
-      prevLinieCorp = linieCorp;
-      prevColoanaCorp = coloanaCorp;
-      linieCorp = random(7);
-      coloanaCorp = random(7);
+      prevObjectLine = objectLine;
+      prevObjectColumn = objectColumn;
+      objectLine = random(7);
+      objectColumn = random(7);
     }
     lcd.clear();
     lcd.home();
@@ -342,73 +343,73 @@ void nivelFreestyle() {
     lcd.setCursor(0, 1);
     lcd.print("Timer: ");
     lcd.setCursor(7, 1);
-    lcd.print(timpMaxim / 1000);
-    matrixDisplay[prevLiniePunct][prevColoanaPunct] = 0;
-    for (i = prevLinieCorp; i <= prevLinieCorp + 1; i++) {
-      for (j = prevColoanaCorp; j <= prevColoanaCorp + 1; j++) {
+    lcd.print(maxTime / 1000);
+    matrixDisplay[prevPointLine][prevPointColumn] = 0;
+    for (i = prevObjectLine; i <= prevObjectLine + 1; i++) {
+      for (j = prevObjectColumn; j <= prevObjectColumn + 1; j++) {
         matrixDisplay[i][j] = 0;
       }
     }
   }
 }
 
-void nivelAvansat() {
+void advancedLevel() {
   randomSeed(analogRead(A0));
-  liniePunct = random(7);
-  coloanaPunct = random(7);
-  linieCorp = random(7);
-  coloanaCorp = random(7);
+  pointLine = random(7);
+  pointColumn = random(7);
+  objectLine = random(7);
+  objectColumn = random(7);
   int timeNow = millis();
-  int timpMaxim = 30000;
+  int maxTime = 30000;
   int i, j;
-  while (timpMaxim > 0) {
+  while (maxTime > 0) {
     recordGyroRegisters();
     if (millis() - timeNow >= 1000) {
-      timpMaxim -= 1000;
+      maxTime -= 1000;
       timeNow += 1000;
-      if (timpMaxim == 0)
+      if (maxTime == 0)
         timeUP();
     }
-    matrixDisplay[liniePunct][coloanaPunct] = 1;
-    matrixDisplay[linieCorp][coloanaCorp] = 1;
+    matrixDisplay[pointLine][pointColumn] = 1;
+    matrixDisplay[objectLine][objectColumn] = 1;
     printMatrix();
-    prevLiniePunct = liniePunct;
-    prevColoanaPunct = coloanaPunct;
+    prevPointLine = pointLine;
+    prevPointColumn = pointColumn;
     if (rotX > 50) {
-      coloanaPunct++;
-      if (coloanaPunct >= 8) {
-        coloanaPunct = 0; 
+      pointColumn++;
+      if (pointColumn >= 8) {
+        pointColumn = 0; 
         score -= 2;
       }
     }
     if (rotX < -50) {
-      coloanaPunct--;
-      if (coloanaPunct < 0) {
-        coloanaPunct = 7;
+      pointColumn--;
+      if (pointColumn < 0) {
+        pointColumn = 7;
         score -= 2;
       }
     }
     if (rotY < -50) {
-      liniePunct++;
-      if (liniePunct >= 8) {
-        liniePunct = 0;
+      pointLine++;
+      if (pointLine >= 8) {
+        pointLine = 0;
         score -= 2;
       }
     }
     if (rotY > 50) {
-      liniePunct--;
-      if (liniePunct < 0) {
-        liniePunct = 7;
+      pointLine--;
+      if (pointLine < 0) {
+        pointLine = 7;
         score -= 2;
       }
     }
-    if (liniePunct == linieCorp && coloanaPunct == coloanaCorp) {
+    if (pointLine == objectLine && pointColumn == objectColumn) {
       score += 10;
-      prevLinieCorp = linieCorp;
-      prevColoanaCorp = coloanaCorp;
-      linieCorp = random(7);
-      coloanaCorp = random(7);
-      matrixDisplay[prevLinieCorp][prevColoanaCorp] = 0;
+      prevObjectLine = objectLine;
+      prevObjectColumn = objectColumn;
+      objectLine = random(7);
+      objectColumn = random(7);
+      matrixDisplay[prevObjectLine][prevObjectColumn] = 0;
     }
     lcd.clear();
     lcd.home();
@@ -418,71 +419,71 @@ void nivelAvansat() {
     lcd.setCursor(0, 1);
     lcd.print("Timer: ");
     lcd.setCursor(7, 1);
-    lcd.print(timpMaxim / 1000);
-    matrixDisplay[prevLiniePunct][prevColoanaPunct] = 0;
+    lcd.print(maxTime / 1000);
+    matrixDisplay[prevPointLine][prevPointColumn] = 0;
   }
 }
 
-void nivelIncepator() {
+void nivelBegginer() {
   randomSeed(analogRead(A0));
-  liniePunct = random(7);
-  coloanaPunct = random(7);
-  linieCorp = random(7);
-  coloanaCorp = random(7);
+  pointLine = random(7);
+  pointColumn = random(7);
+  objectLine = random(7);
+  objectColumn = random(7);
   int timeNow = millis();
-  int timpMaxim = 30000;
+  int maxTime = 30000;
   int i, j;
-  while (timpMaxim > 0) {
+  while (maxTime > 0) {
     recordGyroRegisters();
     if (millis() - timeNow >= 1000) {
-      timpMaxim -= 1000;
+      maxTime -= 1000;
       timeNow += 1000;
-      if (timpMaxim == 0)
+      if (maxTime == 0)
         timeUP();
     }
-    matrixDisplay[liniePunct][coloanaPunct] = 1;
-    for (i = linieCorp; i <= linieCorp + 1; i++) {
-      for (j = coloanaCorp; j <= coloanaCorp + 1; j++) {
+    matrixDisplay[pointLine][pointColumn] = 1;
+    for (i = objectLine; i <= objectLine + 1; i++) {
+      for (j = objectColumn; j <= objectColumn + 1; j++) {
         matrixDisplay[i][j] = 1;
       }
     }
     printMatrix();
-    prevLiniePunct = liniePunct;
-    prevColoanaPunct = coloanaPunct;
+    prevPointLine = pointLine;
+    prevPointColumn = pointColumn;
     if (rotX > 50) {
-      coloanaPunct++;
-      if (coloanaPunct >= 8) {
-        coloanaPunct = 0;
+      pointColumn++;
+      if (pointColumn >= 8) {
+        pointColumn = 0;
         score--;
       }
     }
     if (rotX < -50) {
-      coloanaPunct--;
-      if (coloanaPunct < 0) {
-        coloanaPunct = 7;
+      pointColumn--;
+      if (pointColumn < 0) {
+        pointColumn = 7;
         score--;
       }
     }
     if (rotY < -50) {
-      liniePunct++;
-      if (liniePunct >= 8) {
-        liniePunct = 0;
+      pointLine++;
+      if (pointLine >= 8) {
+        pointLine = 0;
         score--;
       }
     }
     if (rotY > 50) {
-      liniePunct--;
-      if (liniePunct < 0) {
-        liniePunct = 7;
+      pointLine--;
+      if (pointLine < 0) {
+        pointLine = 7;
         score--;
       }
     }
-    if (liniePunct == linieCorp && coloanaPunct == coloanaCorp || liniePunct == linieCorp && coloanaPunct == coloanaCorp + 1 || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp + 1) {
+    if (pointLine == objectLine && pointColumn == objectColumn || pointLine == objectLine && pointColumn == objectColumn + 1 || pointLine == objectLine + 1 && pointColumn == objectColumn || pointLine == objectLine + 1 && pointColumn == objectColumn + 1) {
       score += 10;
-      prevLinieCorp = linieCorp;
-      prevColoanaCorp = coloanaCorp;
-      linieCorp = random(7);
-      coloanaCorp = random(7);
+      prevObjectLine = objectLine;
+      prevObjectColumn = objectColumn;
+      objectLine = random(7);
+      objectColumn = random(7);
     }
     lcd.clear();
     lcd.home();
@@ -492,10 +493,10 @@ void nivelIncepator() {
     lcd.setCursor(0, 1);
     lcd.print("Timer: ");
     lcd.setCursor(7, 1);
-    lcd.print(timpMaxim / 1000);
-    matrixDisplay[prevLiniePunct][prevColoanaPunct] = 0;
-    for (i = prevLinieCorp; i <= prevLinieCorp + 1; i++) {
-      for (j = prevColoanaCorp; j <= prevColoanaCorp + 1; j++) {
+    lcd.print(maxTime / 1000);
+    matrixDisplay[prevPointLine][prevPointColumn] = 0;
+    for (i = prevObjectLine; i <= prevObjectLine + 1; i++) {
+      for (j = prevObjectColumn; j <= prevObjectColumn + 1; j++) {
         matrixDisplay[i][j] = 0;
       }
     }
