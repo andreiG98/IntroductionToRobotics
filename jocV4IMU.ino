@@ -80,7 +80,7 @@ byte three[8] = {
 };
 
 struct highScore {
-  int begginer;
+  int beginner;
   int advanced;
   int freestyle;
 };
@@ -199,13 +199,13 @@ void meniu() {
     mode--;
   switch (mode) {
     case 1:
-      nivelBegginer();
+      beginnerLevel();
       break;
     case 2:
       advancedLevel();
       break;
     case 3:
-      nivelFreestyle();
+      freestyleLevel();
       break;
   }
 }
@@ -230,8 +230,8 @@ void timeUP() {
   EEPROM.get(0, auxScore);
   switch (mode) {
     case 1:
-      if (score > auxScore.begginer) {
-        auxScore.begginer = score;
+      if (score > auxScore.beginner) {
+        auxScore.beginner = score;
         lcd.clear();
         lcd.setCursor(3, 0);
         lcd.print("Congrats!");
@@ -282,7 +282,7 @@ void printMatrix() {
   }
 }
 
-void nivelFreestyle() {
+void freestyleLevel() {
   randomSeed(analogRead(A0));
   pointLine = random(7);
   pointColumn = random(7);
@@ -424,7 +424,7 @@ void advancedLevel() {
   }
 }
 
-void nivelBegginer() {
+void beginnerLevel() {
   randomSeed(analogRead(A0));
   pointLine = random(7);
   pointColumn = random(7);
@@ -519,10 +519,5 @@ void setup() {
 }
 
 void loop() {
-  //recordAccelRegisters();
-  //recordGyroRegisters();
-  //printData();
-  //delay(100);
   meniu();
-  //nivelFreestyle();
 }
