@@ -11,7 +11,7 @@
 
 ## REGULI
 
-Jocul este asemanator jocului Snake, insa jucatorul controleaza punctul prin miscari ale giroscopului pus la dispozitie de MPU6050
+Jocul este asemanator jocului Snake, insa jucatorul controleaza punctul prin miscari circulare, preluate de giroscop. Acest lucru este posibil prin folosirea unui senzor IMU, mai exact a unui MPU6050.
 
 ###### Nivelul Incepator
 
