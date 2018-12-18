@@ -11,7 +11,7 @@
 
 ## REGULI
 
-Jocul seamana cu snake, doar ca in loc de joystick se foloseste accelerometrul si giroscopul puse la dispozitie de MPU6050.
+Jocul este asemanator jocului Snake, insa jucatorul controleaza punctul prin miscari ale giroscopului pus la dispozitie de MPU6050
 
 ###### Nivelul Incepator
 
