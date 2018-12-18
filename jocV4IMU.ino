@@ -2,7 +2,6 @@
 #include "LedControl.h"
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
-
 #define V0_PIN 9
 #define BUZZER A3
 #define INPUT_BUTTON A1
@@ -12,7 +11,6 @@ LiquidCrystal lcd(8, 3, 4, 5, 6, 7);
 
 long gyroX, gyroY, gyroZ;
 float rotX, rotY, rotZ;
-
 int buttonPressed = 0;
 int IMUMoved = 0;
 int liniePunct;
@@ -108,14 +106,12 @@ void recordGyroRegisters() {
   while(Wire.available() < 6);
   gyroX = Wire.read()<<8|Wire.read(); //Store first two bytes into accelX
   gyroY = Wire.read()<<8|Wire.read(); //Store middle two bytes into accelY
-  gyroZ = Wire.read()<<8|Wire.read(); //Store last two bytes into accelZ
   processGyroData();
 }
 
 void processGyroData() {
   rotX = gyroX / 131.0;
   rotY = gyroY / 131.0; 
-  rotZ = gyroZ / 131.0;
 }
 
 void printData() {
@@ -129,51 +125,42 @@ void printData() {
 }
 
 void buzzer() {
-  //tone(BUZZER, 1000);
-  //delay(1000);
-  //noTone(BUZZER);
+  tone(BUZZER, 1000);
+  delay(1000);
+  noTone(BUZZER);
 }
 
 void meniu() {
   int buttonValue = analogRead(A1);
-  Serial.println(buttonValue);
   int period = 1500;
   unsigned long timeNow = millis();
-
   lc.clearDisplay(0);
   for (int i = 0; i < 8; i++)
   {
     lc.setColumn(0, i, one[i]);
   }
-
   lcd.clear();
   lcd.setCursor(3, 0);
   lcd.print("Welcome to");
   lcd.setCursor(4, 1);
   lcd.print("my game!");
   delay(period);
-
   timeNow = millis();
   lcd.clear();
   lcd.print("1 - Beginner");
   delay(period);
-
   timeNow = millis();
   lcd.clear();
   lcd.print("2 - Advanced");
   delay(period);
-
   timeNow = millis();
   lcd.clear();
   lcd.print("3 - Freestyle");
   delay(period);
   lcd.clear();
-
-  while (buttonValue <= 200 || buttonValue >= 950) {
+  while (buttonValue <= 200 || buttonValue >= 900) {
     buttonValue = analogRead(A1);
-    Serial.println(buttonValue);
-
-    if (buttonValue > 950 && buttonPressed == 0) {
+    if (buttonValue > 900 && buttonPressed == 0) {
       buttonPressed = 1;
       switch (mode) {
         case 1:
@@ -205,14 +192,10 @@ void meniu() {
     if (buttonValue >= 0 && buttonValue <= 100)
       buttonPressed = 0;
   }
-
-  /*do {
-    //IMURead();
-    lcd.clear();
-    lcd.setCursor(3, 1);
-    lcd.print("Loading...");
-  } while (rotX > -49 || rotX < -54 || rotY > -24 || rotY < -28);*/
-
+  if(mode == 1)
+    mode = 3;
+  else
+    mode--;
   switch (mode) {
     case 1:
       nivelIncepator();
@@ -281,7 +264,6 @@ void timeUP() {
   lcd.clear();
   do {
     buttonValue = analogRead(A1);
-    Serial.println(buttonValue);
     lcd.setCursor(0, 0);
     lcd.print("Press any button");
     lcd.setCursor(2, 1);
@@ -291,7 +273,6 @@ void timeUP() {
 }
 
 void printMatrix() {
-  //lc.clearDisplay(0);
   int i, j;
   for (i = 0; i < 8; i++) {
     for (j = 0; j < 8; j++) {
@@ -301,13 +282,11 @@ void printMatrix() {
 }
 
 void nivelFreestyle() {
-
   randomSeed(analogRead(A0));
   liniePunct = random(7);
   coloanaPunct = random(7);
   linieCorp = random(7);
   coloanaCorp = random(7);
-
   int timeNow = millis();
   long timpMaxim = 45000;
   int i, j;
@@ -326,17 +305,8 @@ void nivelFreestyle() {
       }
     }
     printMatrix();
-
     prevLiniePunct = liniePunct;
     prevColoanaPunct = coloanaPunct;
-
-    Serial.print(rotX);
-    Serial.print(F(","));
-    Serial.print(rotY);
-    Serial.print(F(","));
-    Serial.println("");
-    delay(5);
-
     if (rotX > 50) {
       coloanaPunct++;
       if (coloanaPunct >= 8)
@@ -347,19 +317,16 @@ void nivelFreestyle() {
       if (coloanaPunct < 0)
         coloanaPunct = 7;
     }
-
     if (rotY < -50) {
       liniePunct++;
       if (liniePunct >= 8)
         liniePunct = 0;
     }
-
     if (rotY > 50) {
       liniePunct--;
       if (liniePunct < 0)
         liniePunct = 7;
     }
-
     if (liniePunct == linieCorp && coloanaPunct == coloanaCorp || liniePunct == linieCorp && coloanaPunct == coloanaCorp + 1 || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp + 1) {
       score++;
       prevLinieCorp = linieCorp;
@@ -367,7 +334,6 @@ void nivelFreestyle() {
       linieCorp = random(7);
       coloanaCorp = random(7);
     }
-
     lcd.clear();
     lcd.home();
     lcd.print("Score: ");
@@ -377,7 +343,6 @@ void nivelFreestyle() {
     lcd.print("Timer: ");
     lcd.setCursor(7, 1);
     lcd.print(timpMaxim / 1000);
-
     matrixDisplay[prevLiniePunct][prevColoanaPunct] = 0;
     for (i = prevLinieCorp; i <= prevLinieCorp + 1; i++) {
       for (j = prevColoanaCorp; j <= prevColoanaCorp + 1; j++) {
@@ -393,7 +358,6 @@ void nivelAvansat() {
   coloanaPunct = random(7);
   linieCorp = random(7);
   coloanaCorp = random(7);
-
   int timeNow = millis();
   int timpMaxim = 30000;
   int i, j;
@@ -407,20 +371,9 @@ void nivelAvansat() {
     }
     matrixDisplay[liniePunct][coloanaPunct] = 1;
     matrixDisplay[linieCorp][coloanaCorp] = 1;
-
-    //printMatrixAdvanced(linieCorp, coloanaCorp);
     printMatrix();
-
     prevLiniePunct = liniePunct;
     prevColoanaPunct = coloanaPunct;
-
-    Serial.print(rotX);
-    Serial.print(F(","));
-    Serial.print(rotY);
-    Serial.print(F(","));
-    Serial.println("");
-    delay(5);
-
     if (rotX > 50) {
       coloanaPunct++;
       if (coloanaPunct >= 8) {
@@ -435,7 +388,6 @@ void nivelAvansat() {
         score -= 2;
       }
     }
-
     if (rotY < -50) {
       liniePunct++;
       if (liniePunct >= 8) {
@@ -443,7 +395,6 @@ void nivelAvansat() {
         score -= 2;
       }
     }
-
     if (rotY > 50) {
       liniePunct--;
       if (liniePunct < 0) {
@@ -451,7 +402,6 @@ void nivelAvansat() {
         score -= 2;
       }
     }
-    
     if (liniePunct == linieCorp && coloanaPunct == coloanaCorp) {
       score += 10;
       prevLinieCorp = linieCorp;
@@ -460,11 +410,9 @@ void nivelAvansat() {
       coloanaCorp = random(7);
       matrixDisplay[prevLinieCorp][prevColoanaCorp] = 0;
     }
-
     lcd.clear();
     lcd.home();
     lcd.print("Score: ");
-    Serial.println(score);
     lcd.setCursor(7, 0);
     lcd.print(score);
     lcd.setCursor(0, 1);
@@ -481,7 +429,6 @@ void nivelIncepator() {
   coloanaPunct = random(7);
   linieCorp = random(7);
   coloanaCorp = random(7);
-
   int timeNow = millis();
   int timpMaxim = 30000;
   int i, j;
@@ -500,17 +447,8 @@ void nivelIncepator() {
       }
     }
     printMatrix();
-
     prevLiniePunct = liniePunct;
     prevColoanaPunct = coloanaPunct;
-
-    Serial.print(rotX);
-    Serial.print(F(","));
-    Serial.print(rotY);
-    Serial.print(F(","));
-    Serial.println("");
-    delay(5);
-
     if (rotX > 50) {
       coloanaPunct++;
       if (coloanaPunct >= 8) {
@@ -525,7 +463,6 @@ void nivelIncepator() {
         score--;
       }
     }
-
     if (rotY < -50) {
       liniePunct++;
       if (liniePunct >= 8) {
@@ -533,7 +470,6 @@ void nivelIncepator() {
         score--;
       }
     }
-
     if (rotY > 50) {
       liniePunct--;
       if (liniePunct < 0) {
@@ -541,7 +477,6 @@ void nivelIncepator() {
         score--;
       }
     }
-    
     if (liniePunct == linieCorp && coloanaPunct == coloanaCorp || liniePunct == linieCorp && coloanaPunct == coloanaCorp + 1 || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp || liniePunct == linieCorp + 1 && coloanaPunct == coloanaCorp + 1) {
       score += 10;
       prevLinieCorp = linieCorp;
@@ -549,18 +484,15 @@ void nivelIncepator() {
       linieCorp = random(7);
       coloanaCorp = random(7);
     }
-
     lcd.clear();
     lcd.home();
     lcd.print("Score: ");
-    Serial.println(score);
     lcd.setCursor(7, 0);
     lcd.print(score);
     lcd.setCursor(0, 1);
     lcd.print("Timer: ");
     lcd.setCursor(7, 1);
     lcd.print(timpMaxim / 1000);
-
     matrixDisplay[prevLiniePunct][prevColoanaPunct] = 0;
     for (i = prevLinieCorp; i <= prevLinieCorp + 1; i++) {
       for (j = prevColoanaCorp; j <= prevColoanaCorp + 1; j++) {
@@ -574,21 +506,15 @@ void setup() {
   Serial.begin(9600);
   Wire.begin();
   setupMPU();
-  
   lc.shutdown(0, false); //turn off power saving, enable display
   lc.setIntensity(0, 0); //sets brightness
   lc.clearDisplay(0); //clear screen
-
   lcd.begin(16, 2); //seteaza dim
   pinMode(V0_PIN, OUTPUT);
   analogWrite(V0_PIN, 100);
-
   pinMode(INPUT_BUTTON, INPUT);
-
   pinMode(BUZZER, OUTPUT);
-
   score = 0;
-  
 }
 
 void loop() {
