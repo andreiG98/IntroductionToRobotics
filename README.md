@@ -27,4 +27,4 @@ In acest nivel, jucatorul este reprezentat de un punct pe matrice. Acesta are la
 
 ## Gameplay
 
-https://drive.google.com/open?id=10_7Pxo6ewqDuOrj0SttQ5iBa6uvPUOEk
+https://drive.google.com/open?id=1IPwGh9FLNQ4FO3eWsCqB9iXSPP7PbG9y
