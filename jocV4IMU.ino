@@ -3,8 +3,21 @@
 #include <LiquidCrystal.h>
 #include <EEPROM.h>
 #define V0_PIN 9
-#define BUZZER A3
+#define BUZZER_PIN A3
+#define BUTTON_PIN A1
 #define INPUT_BUTTON A1
+#define RANDOM_PIN A0
+#define gyroSensitivity 131
+#define buzzerNoise 1000
+#define periodShowLCD 1500
+#define maxLineColumn 7
+#define oneSecond 1000
+#define maxTimeFreestyle 45000
+#define maxTimeBegginerAdvanced 30000
+#define rotXValueLeft 50
+#define rotXValueRight -50
+#define rotYValueUp -50
+#define rotYValueDown 50
 
 LedControl lc = LedControl(12, 11, 10, 1); //DIN, CLK, LOAD, No.Driver
 LiquidCrystal lcd(8, 3, 4, 5, 6, 7);
@@ -22,7 +35,7 @@ int prevPointColumn;
 int prevObjectLine;
 int prevObjectColumn;
 int score;
-int mode = 1;
+int difficulty = 1;
 
 bool matrixDisplay[8][8] = {
   {0, 0, 0, 0, 0, 0, 0, 0},
@@ -110,8 +123,8 @@ void recordGyroRegisters() {
 }
 
 void processGyroData() {
-  rotX = gyroX / 131.0;
-  rotY = gyroY / 131.0; 
+  rotX = gyroX / gyroSensitivity;
+  rotY = gyroY / gyroSensitivity; 
 }
 
 void printData() {
@@ -125,14 +138,13 @@ void printData() {
 }
 
 void buzzer() {
-  tone(BUZZER, 1000);
-  delay(1000);
-  noTone(BUZZER);
+  tone(BUZZER_PIN, buzzerNoise);
+  delay(buzzerNoise);
+  noTone(BUZZER_PIN);
 }
 
 void meniu() {
-  int buttonValue = analogRead(A1);
-  int period = 1500;
+  int buttonValue = analogRead(BUTTON_PIN);
   unsigned long timeNow = millis();
   lc.clearDisplay(0);
   for (int i = 0; i < 8; i++)
@@ -144,28 +156,28 @@ void meniu() {
   lcd.print("Welcome to");
   lcd.setCursor(4, 1);
   lcd.print("my game!");
-  delay(period);
+  delay(periodShowLCD);
   timeNow = millis();
   lcd.clear();
   lcd.print("1 - Beginner");
-  delay(period);
+  delay(periodShowLCD);
   timeNow = millis();
   lcd.clear();
   lcd.print("2 - Advanced");
-  delay(period);
+  delay(periodShowLCD );
   timeNow = millis();
   lcd.clear();
   lcd.print("3 - Freestyle");
-  delay(period);
+  delay(periodShowLCD );
   lcd.clear();
   while (buttonValue <= 200 || buttonValue >= 900) {
-    buttonValue = analogRead(A1);
+    buttonValue = analogRead(BUTTON_PIN);
     Serial.println(buttonValue);
     if (buttonValue > 900 && buttonPressed == 0) {
       buttonPressed = 1;
-      switch (mode) {
+      switch (difficulty) {
         case 1:
-          mode = 2;
+          difficulty = 2;
           lc.clearDisplay(0);
           for (int i = 0; i < 8; i++)
           {
@@ -173,7 +185,7 @@ void meniu() {
           }
           break;
         case 2:
-          mode = 3;
+          difficulty = 3;
           lc.clearDisplay(0);
           for (int i = 0; i < 8; i++)
           {
@@ -181,7 +193,7 @@ void meniu() {
           }
           break;
         case 3:
-          mode = 1;
+          difficulty = 1;
           lc.clearDisplay(0);
           for (int i = 0; i < 8; i++)
           {
@@ -193,11 +205,11 @@ void meniu() {
     if (buttonValue >= 0 && buttonValue <= 100)
       buttonPressed = 0;
   }
-  if(mode == 1)
-    mode = 3;
+  /*if(difficulty == 1)
+    difficulty = 3;
   else
-    mode--;
-  switch (mode) {
+    difficulty--;*/
+  switch (difficulty) {
     case 1:
       beginnerLevel();
       break;
@@ -228,7 +240,7 @@ void timeUP() {
   delay(3000);
   highScore auxScore;
   EEPROM.get(0, auxScore);
-  switch (mode) {
+  switch (difficulty) {
     case 1:
       if (score > auxScore.beginner) {
         auxScore.beginner = score;
@@ -264,7 +276,7 @@ void timeUP() {
   EEPROM.put(0, auxScore);
   lcd.clear();
   do {
-    buttonValue = analogRead(A1);
+    buttonValue = analogRead(BUTTON_PIN);
     lcd.setCursor(0, 0);
     lcd.print("Press any button");
     lcd.setCursor(2, 1);
@@ -282,20 +294,24 @@ void printMatrix() {
   }
 }
 
+void generatePointObject() {
+  randomSeed(analogRead(RANDOM_PIN));
+  pointLine = random(maxLineColumn);
+  pointColumn = random(maxLineColumn);
+  objectLine = random(maxLineColumn);
+  objectColumn = random(maxLineColumn);
+}
+
 void freestyleLevel() {
-  randomSeed(analogRead(A0));
-  pointLine = random(7);
-  pointColumn = random(7);
-  objectLine = random(7);
-  objectColumn = random(7);
-  int timeNow = millis();
-  long maxTime = 45000;
+  generatePointObject();
+  unsigned long timeNow = millis();
+  unsigned long maxTime = maxTimeFreestyle;
   int i, j;
   while (maxTime > 0) {
     recordGyroRegisters();
-    if (millis() - timeNow >= 1000) {
-      maxTime -= 1000;
-      timeNow += 1000;
+    if (millis() - timeNow >= oneSecond) {
+      maxTime -= oneSecond;
+      timeNow += oneSecond;
       if (maxTime == 0)
         timeUP();
     }
@@ -308,22 +324,22 @@ void freestyleLevel() {
     printMatrix();
     prevPointLine = pointLine;
     prevPointColumn = pointColumn;
-    if (rotX > 50) {
+    if (rotX > rotXValueLeft) {
       pointColumn++;
       if (pointColumn >= 8)
         pointColumn = 0;
     }
-    if (rotX < -50) {
+    if (rotX < rotXValueRight) {
       pointColumn--;
       if (pointColumn < 0)
         pointColumn = 7;
     }
-    if (rotY < -50) {
+    if (rotY < rotYValueUp) {
       pointLine++;
       if (pointLine >= 8)
         pointLine = 0;
     }
-    if (rotY > 50) {
+    if (rotY > rotYValueDown) {
       pointLine--;
       if (pointLine < 0)
         pointLine = 7;
@@ -332,8 +348,8 @@ void freestyleLevel() {
       score++;
       prevObjectLine = objectLine;
       prevObjectColumn = objectColumn;
-      objectLine = random(7);
-      objectColumn = random(7);
+      objectLine = random(maxLineColumn);
+      objectColumn = random(maxLineColumn);
     }
     lcd.clear();
     lcd.home();
@@ -354,19 +370,15 @@ void freestyleLevel() {
 }
 
 void advancedLevel() {
-  randomSeed(analogRead(A0));
-  pointLine = random(7);
-  pointColumn = random(7);
-  objectLine = random(7);
-  objectColumn = random(7);
-  int timeNow = millis();
-  int maxTime = 30000;
+  generatePointObject();
+  unsigned long timeNow = millis();
+  unsigned long maxTime = maxTimeBegginerAdvanced;
   int i, j;
   while (maxTime > 0) {
     recordGyroRegisters();
-    if (millis() - timeNow >= 1000) {
-      maxTime -= 1000;
-      timeNow += 1000;
+    if (millis() - timeNow >= oneSecond) {
+      maxTime -= oneSecond;
+      timeNow += oneSecond;
       if (maxTime == 0)
         timeUP();
     }
@@ -375,28 +387,28 @@ void advancedLevel() {
     printMatrix();
     prevPointLine = pointLine;
     prevPointColumn = pointColumn;
-    if (rotX > 50) {
+    if (rotX > rotXValueLeft) {
       pointColumn++;
       if (pointColumn >= 8) {
         pointColumn = 0; 
         score -= 2;
       }
     }
-    if (rotX < -50) {
+    if (rotX < rotXValueRight) {
       pointColumn--;
       if (pointColumn < 0) {
         pointColumn = 7;
         score -= 2;
       }
     }
-    if (rotY < -50) {
+    if (rotY < rotYValueUp) {
       pointLine++;
       if (pointLine >= 8) {
         pointLine = 0;
         score -= 2;
       }
     }
-    if (rotY > 50) {
+    if (rotY > rotYValueDown) {
       pointLine--;
       if (pointLine < 0) {
         pointLine = 7;
@@ -407,8 +419,8 @@ void advancedLevel() {
       score += 10;
       prevObjectLine = objectLine;
       prevObjectColumn = objectColumn;
-      objectLine = random(7);
-      objectColumn = random(7);
+      objectLine = random(maxLineColumn);
+      objectColumn = random(maxLineColumn);
       matrixDisplay[prevObjectLine][prevObjectColumn] = 0;
     }
     lcd.clear();
@@ -425,19 +437,15 @@ void advancedLevel() {
 }
 
 void beginnerLevel() {
-  randomSeed(analogRead(A0));
-  pointLine = random(7);
-  pointColumn = random(7);
-  objectLine = random(7);
-  objectColumn = random(7);
-  int timeNow = millis();
-  int maxTime = 30000;
+  generatePointObject();
+  unsigned long timeNow = millis();
+  unsigned long maxTime = maxTimeBegginerAdvanced;
   int i, j;
   while (maxTime > 0) {
     recordGyroRegisters();
     if (millis() - timeNow >= 1000) {
-      maxTime -= 1000;
-      timeNow += 1000;
+      maxTime -= oneSecond;
+      timeNow += oneSecond;
       if (maxTime == 0)
         timeUP();
     }
@@ -450,28 +458,28 @@ void beginnerLevel() {
     printMatrix();
     prevPointLine = pointLine;
     prevPointColumn = pointColumn;
-    if (rotX > 50) {
+    if (rotX > rotXValueLeft) {
       pointColumn++;
       if (pointColumn >= 8) {
         pointColumn = 0;
         score--;
       }
     }
-    if (rotX < -50) {
+    if (rotX < rotXValueRight) {
       pointColumn--;
       if (pointColumn < 0) {
         pointColumn = 7;
         score--;
       }
     }
-    if (rotY < -50) {
+    if (rotY < rotYValueUp ) {
       pointLine++;
       if (pointLine >= 8) {
         pointLine = 0;
         score--;
       }
     }
-    if (rotY > 50) {
+    if (rotY > rotYValueDown) {
       pointLine--;
       if (pointLine < 0) {
         pointLine = 7;
@@ -482,8 +490,8 @@ void beginnerLevel() {
       score += 10;
       prevObjectLine = objectLine;
       prevObjectColumn = objectColumn;
-      objectLine = random(7);
-      objectColumn = random(7);
+      objectLine = random(maxLineColumn);
+      objectColumn = random(maxLineColumn);
     }
     lcd.clear();
     lcd.home();
@@ -514,7 +522,7 @@ void setup() {
   pinMode(V0_PIN, OUTPUT);
   analogWrite(V0_PIN, 100);
   pinMode(INPUT_BUTTON, INPUT);
-  pinMode(BUZZER, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
   score = 0;
 }
 
