@@ -24,3 +24,7 @@ In acest nivel, jucatorul este reprezentat de un punct pe matrice. Acesta are la
 ###### Nivelul Freestyle
 
 In acest nivel, jucatorul este reprezentat de un punct pe matrice. Acesta are la dispozitie 45 secunde sa stranga cat mai multe puncte. Obiectul pe care jucatorul trebuie sa-l prinda este de forma unui patrat de 2 x 2 si ii creste acestuia scorul cu 1 punct ori de cate ori il prinde. Dupa cum ii spune si numele, aici nu vor mai exista penalizari pentru depasirea tablei de joc.
+
+## Gameplay
+
+https://drive.google.com/open?id=10_7Pxo6ewqDuOrj0SttQ5iBa6uvPUOEk
