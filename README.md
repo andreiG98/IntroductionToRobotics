@@ -1,29 +1,29 @@
 # IntroductionToRobotics
 
-## COMPONENTE
+## COMPONENTS
 
-→ Matrice 8 x 8 </br>
-→ 1 breadboard mare </br>
-→ 2 breadboard - uri mici </br>
+→ Matrix 8 x 8 </br>
+→ 1 large breadboard </br>
+→ 2 small breadboards </br>
 → LCD Display </br>
-→ 2 butoane </br>
+→ 2 buttons </br>
 → MPU 6050 </br>
 
-## REGULI
+## RULES
 
-Jocul este asemanator jocului Snake, insa jucatorul controleaza punctul prin miscari circulare, preluate de giroscop. Acest lucru este posibil prin folosirea unui senzor IMU, mai exact a unui MPU6050.
+The game is similar to the Snake game, but the player controls the point by circular movements, taken by the gyroscope. This is possible by using an IMU sensor, specifically a MPU6050.
 
-###### Nivelul Incepator
+###### Beginner Level
 
-In acest nivel, jucatorul este reprezentat de un punct pe matrice. Acesta are la dispozitie 30 secunde sa stranga cat mai multe puncte. Obiectul pe care jucatorul trebuie sa-l prinda este de forma unui patrat de 2 x 2 si ii creste acestuia scorul cu 10 puncte ori de cate ori il prinde. Indicat ar fi ca jucatorul sa ramana pe tabla de joc, pentru ca in caz contrar, este penalizat cu 1 punct ori de cate ori iese in afara.
+At this level, the player is represented by a point on the array. It has 30 seconds to collect as many points. The object the player has to capture is the shape of a 2 x 2 square and increases the score by 10 points whenever he catches it. It is indicated that the player remains on the board, otherwise he is penalized with 1 point whenever he / she goes out.
 
-###### Nivelul Avansat
+###### Advanced Level
 
-In acest nivel, jucatorul este reprezentat de un punct pe matrice. Acesta are la dispozitie 30 secunde sa stranga cat mai multe puncte. Obiectul pe care jucatorul trebuie sa-l prinda este de forma unui patrat de 1 x 1 si ii creste acestuia scorul cu 10 puncte ori de cate ori il prinde. Indicat ar fi ca jucatorul sa ramana pe tabla de joc, pentru ca in caz contrar, este penalizat cu 2 puncte ori de cate ori iese in afara.
+At this level, the player is represented by a point on the array. It has 30 seconds to collect as many points. The object that the player has to capture is a 1 x 1 square and increases his score by 10 points whenever he catches it. It is indicated that the player remains on the board, otherwise he is penalized with 2 points whenever he goes out.
 
-###### Nivelul Freestyle
+###### Freestyle Level
 
-In acest nivel, jucatorul este reprezentat de un punct pe matrice. Acesta are la dispozitie 45 secunde sa stranga cat mai multe puncte. Obiectul pe care jucatorul trebuie sa-l prinda este de forma unui patrat de 2 x 2 si ii creste acestuia scorul cu 1 punct ori de cate ori il prinde. Dupa cum ii spune si numele, aici nu vor mai exista penalizari pentru depasirea tablei de joc.
+At this level, the player is represented by a point on the array. It has 45 seconds to collect as many points. The object that the player has to capture is the shape of a 2 x 2 square and increases his score by 1 point whenever he catches it. As the name says, there will be no penalties for overtaking the board.
 
 ## Gameplay
 
